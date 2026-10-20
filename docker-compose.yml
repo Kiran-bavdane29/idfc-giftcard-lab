@@ -1,0 +1,25 @@
+services:
+  backend:
+    build: ./backend
+    container_name: idfc-giftcard-backend
+    ports:
+      - "127.0.0.1:5000:5000"
+    environment:
+      - PORT=5000
+      # Deliberately weak — see VULNERABILITIES.md (JWT section)
+      - JWT_SECRET=secret123
+    volumes:
+      - giftcard-data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: idfc-giftcard-frontend
+    ports:
+      - "127.0.0.1:3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  giftcard-data:

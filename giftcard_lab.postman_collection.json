@@ -1,0 +1,227 @@
+{
+  "info": {
+    "_postman_id": "idfc-giftcard-lab",
+    "name": "Gift Card Security Lab ? Local API",
+    "description": "Local-only collection for the intentionally vulnerable educational lab. Use disposable demo data only. The collection contains ordinary auth and store requests; it does not include exploit payloads or administrative bypass requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"mallory\",\n  \"email\": \"mallory@example.com\",\n  \"password\": \"mallory123\"\n}"
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) pm.collectionVariables.set('token', pm.response.json().token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login (alice)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"alice\",\n  \"password\": \"alice123\"\n}"
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('token', pm.response.json().token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get my profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/users/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Store & Gift Cards",
+      "item": [
+        {
+          "name": "List catalog",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/store/cards"
+          }
+        },
+        {
+          "name": "Purchase card",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/store/purchase",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"catalog_id\": 1,\n  \"message\": \"Happy Birthday!\",\n  \"payWith\": \"balance\"\n}"
+            }
+          }
+        },
+        {
+          "name": "My gift cards",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/giftcards"
+          }
+        },
+        {
+          "name": "Get card by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{base_url}}/api/v1/giftcards/1"
+          }
+        },
+        {
+          "name": "Search cards",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/giftcards/search?q=amazon",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "giftcards",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "amazon"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Redeem code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/giftcards/redeem",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"IDFC-AMAZON-DEMO1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Transfer card",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/giftcards/transfer",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"card_id\": 1,\n  \"recipient\": \"bob\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update profile (legit)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/users/profile",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alice2@example.com\"\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

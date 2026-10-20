@@ -1,0 +1,56 @@
+# Custom Semgrep rules tuned to the deliberate vulnerabilities in this lab.
+# Every rule below SHOULD fire — clean results mean the lab was accidentally fixed.
+rules:
+  - id: lab-jwt-alg-none-accepted
+    message: JWT tokens with alg=none are accepted — signature bypass.
+    severity: ERROR
+    languages: [javascript]
+    patterns:
+      - pattern-either:
+          - pattern: jwt.decode($TOKEN)
+          - pattern-inside: |
+              $H = ...;
+              ...
+              if ($H.alg === 'none') { ... }
+
+  - id: lab-hardcoded-jwt-secret
+    message: Hardcoded JWT secret. Use a strong secret from a vault/env.
+    severity: ERROR
+    languages: [javascript]
+    patterns:
+      - pattern-either:
+          - pattern: jwtSecret = $X || 'secret123'
+          - pattern: jwt.verify($T, 'secret123', ...)
+          - pattern: jwt.sign($P, 'secret123', ...)
+
+  - id: lab-sql-string-concat
+    message: SQL query built by string concatenation — injectable.
+    severity: ERROR
+    languages: [javascript]
+    pattern-inside: |
+      $DB = require('better-sqlite3');
+      ...
+    pattern-either:
+      - pattern: $DB.prepare($A + $B)
+      - pattern: $DB.prepare(`...${$X}...`)
+
+  - id: lab-mass-assignment-update
+    message: Request body fields written directly into UPDATE — mass assignment.
+    severity: WARNING
+    languages: [javascript]
+    pattern: |
+      $KEYS = Object.keys($BODY);
+      ...
+      `UPDATE users SET ${$KEYS.map(...)} ...`
+
+  - id: lab-react-dangerous-html
+    message: dangerouslySetInnerHTML with un-sanitized content — stored XSS.
+    severity: ERROR
+    languages: [javascript]
+    pattern: dangerouslySetInnerHTML={{ __html: $X }}
+
+  - id: lab-stacktrace-in-response
+    message: Stack trace returned in HTTP response — information disclosure.
+    severity: WARNING
+    languages: [javascript]
+    pattern: $RES.status(...).json({ ..., stack: $ERR.stack, ... })

@@ -1,0 +1,26 @@
+# Gitleaks configuration for the lab repo.
+# Extends the default rules with lab-specific secret patterns.
+
+title = "IDFC Gift Card Lab — gitleaks config"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "idfc-internal-api-key"
+description = "IDFC internal API key pattern"
+regex = '''IDFC-INTERNAL-APIKEY-[0-9a-z]{18}'''
+tags = ["idfc", "apikey"]
+
+[[rules]]
+id = "lab-jwt-secret"
+description = "Weak hardcoded JWT secret"
+regex = '''(?i)(jwt[_-]?secret|jwtSecret)\s*[:=]\s*['"](secret123|secret|changeme)['"]'''
+tags = ["jwt", "weak-secret"]
+
+[allowlist]
+description = "Allow test/demo material that is intentionally public"
+paths = [
+  '''giftcard_lab\.postman_collection\.json''',
+  '''VULNERABILITIES\.md''',
+]

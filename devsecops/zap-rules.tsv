@@ -1,0 +1,15 @@
+# ZAP baseline rules file — tune alert handling per rule id.
+# Format: ruleId	threshold	(IGNORE | FAIL | WARN | INFO)
+10015	INFO
+10027	INFO
+10035	INFO
+10096	INFO
+10098	INFO
+10010	INFO
+10011	INFO
+10020	WARN
+10021	WARN
+40012	WARN
+40014	WARN
+40018	WARN
+90022	WARN
